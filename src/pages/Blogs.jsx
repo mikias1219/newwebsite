@@ -1,18 +1,17 @@
-import BlogCard from '../components/BlogCard';
-import React from 'react';  
 
-function Blogs() {
-  const posts = [
-    { id: 1, title: 'Inventory Tips', excerpt: 'Learn how to optimize stock.' },
-    { id: 2, title: 'Why Track Inventory?', excerpt: 'Benefits of real-time tracking.' },
-  ];
+import React from 'react';
 
+function Blogs({ blogs }) {
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Blogs</h1>
+      <h2 className="text-3xl font-bold mb-6 text-center">Blogs</h2>
       <div className="space-y-4">
-        {posts.map((post) => (
-          <BlogCard key={post.id} post={post} />
+        {blogs.map((post) => (
+          <div key={post.id} className="bg-gray-700 p-4 rounded-lg shadow">
+            <h3 className="text-xl font-semibold mb-2">{post.title}</h3>
+            <p className="text-gray-300 mb-2">{post.excerpt}</p>
+            <p className="text-sm text-gray-500">Posted: {post.postedDate}</p>
+          </div>
         ))}
       </div>
     </div>

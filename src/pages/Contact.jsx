@@ -1,16 +1,15 @@
+
 import React from 'react';
+import ContactForm from '../components/ContactForm';
+
 function Contact() {
-    return (
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Contact Us</h1>
-        <form className="space-y-4 max-w-md">
-          <input type="text" placeholder="Name" className="w-full p-2 border rounded" />
-          <input type="email" placeholder="Email" className="w-full p-2 border rounded" />
-          <textarea placeholder="Message" className="w-full p-2 border rounded"></textarea>
-          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Send</button>
-        </form>
-      </div>
-    );
-  }
-  
-  export default Contact;
+  return (
+    <div className="container mx-auto p-4">
+      <h2 className="text-3xl font-bold mb-4 text-center">Contact Us</h2>
+      <p className="text-lg mb-6 text-center">Get in touch with us for any inquiries or service requests. Our team is ready to assist you with expert advice and support.</p>
+      <ContactForm />
+    </div>
+  );
+}
+
+export default Contact;
