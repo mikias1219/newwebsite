@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 function ProductModal({ product, onClose }) {
@@ -9,7 +8,7 @@ function ProductModal({ product, onClose }) {
         <img src={product.image} alt={product.name} className="w-full h-48 object-cover rounded mb-4" />
         <p className="text-lg mb-2">Price: ${product.price.toFixed(2)}</p>
         <p className="text-gray-300 mb-4">{product.description}</p>
-        <p className="text-sm text-gray-500 mb-4">Posted: {product.postedDate}</p>
+        <p className="text-sm text-gray-500 mb-4">Posted: {product.posted_date}</p>
         <button
           onClick={onClose}
           className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"

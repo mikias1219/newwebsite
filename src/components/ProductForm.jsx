@@ -1,7 +1,7 @@
-
 import React, { useState } from 'react';
+import { createProduct, updateProduct, deleteProduct, createTutorial } from '../services/api';
 
-function ProductForm({ products, setProducts, setBlogs }) {
+function ProductForm({ products, setProducts, setTutorials }) {
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [price, setPrice] = useState('');
@@ -9,52 +9,58 @@ function ProductForm({ products, setProducts, setBlogs }) {
   const [image, setImage] = useState('');
   const [editId, setEditId] = useState(null);
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const postedDate = new Date().toISOString().split('T')[0];
+    const posted_date = new Date().toISOString().split('T')[0];
     const product = {
-      id: editId || Date.now(),
       name,
       type,
       price: parseFloat(price),
       description,
       image: image || '/products/placeholder.jpg',
-      postedDate,
+      posted_date,
     };
 
-    setProducts((prev) =>
-      editId
-        ? prev.map((p) => (p.id === editId ? product : p))
-        : [...prev, product]
-    );
+    try {
+      const token = localStorage.getItem('authToken');
+      let newProduct;
+      if (editId) {
+        newProduct = await updateProduct(editId, product, token);
+        setProducts((prev) => prev.map((p) => (p.id === editId ? newProduct : p)));
+        setMessage('Product updated successfully!');
+      } else {
+        newProduct = await createProduct(product, token);
+        setProducts((prev) => [...prev, newProduct]);
+        setMessage('Product added successfully!');
 
-    // Auto-generate blog post for new product
-    if (!editId) {
-      setBlogs((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          title: `Introducing ${name}`,
-          excerpt: `Discover the new ${name}, a ${type} PlayStation with ${description.slice(0, 50)}...`,
-          postedDate,
-        },
-      ]);
+        // Auto-generate tutorial
+        const tutorial = {
+          title: `How to Maintain Your ${name}`,
+          content: `Learn how to keep your ${name} (${type}) in top condition:\n\n1. **Cleaning**: Use a soft, dry cloth to wipe the console weekly. Avoid water or harsh chemicals.\n2. **Ventilation**: Ensure the console is in a well-ventilated area to prevent overheating.\n3. **Disc Care**: Store discs in their cases to avoid scratches.\n4. **Software Updates**: Regularly check for system updates via Settings > System > System Software.\n5. **Controller Maintenance**: Clean controllers with a damp cloth and check battery levels.\n\nFor detailed support, contact our team at support@seliklabs.com.`,
+          posted_date,
+        };
+        const newTutorial = await createTutorial(tutorial, token);
+        setTutorials((prev) => [...prev, newTutorial]);
+      }
+
+      // Reset form
+      setName('');
+      setType('');
+      setPrice('');
+      setDescription('');
+      setImage('');
+      setEditId(null);
+      setError('');
+    } catch (err) {
+      setError('Failed to save product');
     }
 
-    // Set success message
-    setMessage(editId ? 'Product updated successfully!' : 'Product added successfully!');
-
-    // Reset form
-    setName('');
-    setType('');
-    setPrice('');
-    setDescription('');
-    setImage('');
-    setEditId(null);
-
-    // Clear message after 3 seconds
-    setTimeout(() => setMessage(''), 3000);
+    setTimeout(() => {
+      setMessage('');
+      setError('');
+    }, 3000);
   };
 
   const handleEdit = (product) => {
@@ -65,12 +71,23 @@ function ProductForm({ products, setProducts, setBlogs }) {
     setImage(product.image);
     setEditId(product.id);
     setMessage('');
+    setError('');
   };
 
-  const handleDelete = (id) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
-    setMessage('Product deleted successfully!');
-    setTimeout(() => setMessage(''), 3000);
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      await deleteProduct(id, token);
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      setMessage('Product deleted successfully!');
+      setError('');
+    } catch (err) {
+      setError('Failed to delete product');
+    }
+    setTimeout(() => {
+      setMessage('');
+      setError('');
+    }, 3000);
   };
 
   return (
@@ -79,6 +96,7 @@ function ProductForm({ products, setProducts, setBlogs }) {
         {editId ? 'Edit Product' : 'Add New Product'}
       </h3>
       {message && <p className="text-green-500 mb-4">{message}</p>}
+      {error && <p className="text-red-500 mb-4">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4 mb-8 bg-gray-700 p-6 rounded-lg">
         <div>
           <label className="block text-sm font-medium text-gray-300">Product Name</label>
@@ -149,7 +167,7 @@ function ProductForm({ products, setProducts, setBlogs }) {
               <h4 className="text-lg font-semibold text-white">{product.name} ({product.type})</h4>
               <p className="text-gray-300">Price: ${product.price.toFixed(2)}</p>
               <p className="text-gray-300">{product.description}</p>
-              <p className="text-sm text-gray-500">Posted: {product.postedDate}</p>
+              <p className="text-sm text-gray-500">Posted: {product.posted_date}</p>
               <img src={product.image} alt={product.name} className="w-full h-32 object-cover rounded mt-2" />
               <div className="mt-4 space-x-2">
                 <button

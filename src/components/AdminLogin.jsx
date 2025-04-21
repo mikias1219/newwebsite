@@ -1,18 +1,19 @@
-
 import React, { useState } from 'react';
+import { loginAdmin } from '../services/api';
 
 function AdminLogin({ setIsAuthenticated }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Hardcoded credentials (replace with backend later)
-    if (username === 'admin' && password === 'password') {
+    try {
+      const { access_token } = await loginAdmin({ username, password });
+      localStorage.setItem('authToken', access_token);
       setIsAuthenticated(true);
       setError('');
-    } else {
+    } catch (err) {
       setError('Invalid credentials');
     }
   };

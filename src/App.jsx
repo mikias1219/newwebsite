@@ -1,45 +1,14 @@
-
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import Home from './pages/Home';
+import Inventory from './pages/Inventory';
 import About from './pages/About';
 import Services from './pages/Services';
 import Contact from './pages/Contact';
-import Blogs from './pages/Blogs';
+import Tutorials from './pages/Tutorials';
 import Admin from './pages/Admin';
-
-// Mock initial data (replace with backend later)
-const initialProducts = [
-  {
-    id: 1,
-    name: 'PlayStation 5',
-    type: 'Standard',
-    price: 499.99,
-    description: 'Next-gen gaming with 4K visuals and lightning-fast SSD.',
-    image: '/products/ps5.jpg',
-    postedDate: '2025-04-01',
-  },
-  {
-    id: 2,
-    name: 'PlayStation 5 Slim',
-    type: 'Slim',
-    price: 449.99,
-    description: 'Compact design with the same powerful performance.',
-    image: '/products/ps5-slim.jpg',
-    postedDate: '2025-04-10',
-  },
-];
-
-const initialBlogs = [
-  {
-    id: 1,
-    title: 'Introducing PlayStation 5',
-    excerpt: 'Discover the next generation of gaming with PS5.',
-    postedDate: '2025-04-01',
-  },
-];
+import { fetchProducts, fetchTutorials } from './services/api';
 
 class ErrorBoundary extends React.Component {
   state = { hasError: false };
@@ -61,9 +30,23 @@ function App() {
   const aboutRef = useRef(null);
   const servicesRef = useRef(null);
   const contactRef = useRef(null);
-  const blogsRef = useRef(null);
-  const [products, setProducts] = useState(initialProducts);
-  const [blogs, setBlogs] = useState(initialBlogs);
+  const tutorialsRef = useRef(null);
+  const [products, setProducts] = useState([]);
+  const [tutorials, setTutorials] = useState([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const productsData = await fetchProducts();
+        const tutorialsData = await fetchTutorials();
+        setProducts(productsData);
+        setTutorials(tutorialsData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    loadData();
+  }, []);
 
   const scrollToSection = (ref) => {
     ref.current.scrollIntoView({ behavior: 'smooth' });
@@ -74,7 +57,7 @@ function App() {
       <div className="flex flex-col min-h-screen bg-gray-900 text-white">
         <Navbar
           scrollToSection={scrollToSection}
-          refs={{ homeRef, aboutRef, servicesRef, contactRef, blogsRef }}
+          refs={{ homeRef, aboutRef, servicesRef, contactRef, tutorialsRef }}
         />
         <Routes>
           <Route
@@ -82,7 +65,7 @@ function App() {
             element={
               <main className="flex-grow">
                 <section ref={homeRef} id="home" className="min-h-screen flex items-center bg-cover bg-center" style={{ backgroundImage: 'url(/hero-bg.jpg)' }}>
-                  <Home products={products} />
+                  <Inventory products={products} setProducts={setProducts} />
                 </section>
                 <section ref={aboutRef} id="about" className="min-h-screen flex items-center bg-gray-800">
                   <About />
@@ -93,8 +76,8 @@ function App() {
                 <section ref={contactRef} id="contact" className="min-h-screen flex items-center bg-gray-800">
                   <Contact />
                 </section>
-                <section ref={blogsRef} id="blogs" className="min-h-screen flex items-center bg-gray-900">
-                  <Blogs blogs={blogs} />
+                <section ref={tutorialsRef} id="tutorials" className="min-h-screen flex items-center bg-gray-900">
+                  <Tutorials tutorials={tutorials} />
                 </section>
               </main>
             }
@@ -103,7 +86,7 @@ function App() {
             path="/admin"
             element={
               <ErrorBoundary>
-                <Admin products={products} setProducts={setProducts} blogs={blogs} setBlogs={setBlogs} />
+                <Admin products={products} setProducts={setProducts} tutorials={tutorials} setTutorials={setTutorials} />
               </ErrorBoundary>
             }
           />

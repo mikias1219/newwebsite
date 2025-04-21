@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import ProductForm from './ProductForm';
-import BlogForm from './BlogForm';
+import TutorialForm from './TutorialForm';
 
-function AdminDashboard({ products, setProducts, blogs, setBlogs }) {
+function AdminDashboard({ products, setProducts, tutorials, setTutorials }) {
   const [activeTab, setActiveTab] = useState('products');
 
   return (
@@ -12,7 +11,10 @@ function AdminDashboard({ products, setProducts, blogs, setBlogs }) {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-bold text-white">Admin Dashboard</h2>
           <button
-            onClick={() => window.location.reload()} // Reload to logout (clears isAuthenticated)
+            onClick={() => {
+              localStorage.removeItem('authToken');
+              window.location.reload();
+            }}
             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
           >
             Logout
@@ -26,16 +28,16 @@ function AdminDashboard({ products, setProducts, blogs, setBlogs }) {
             Manage Products
           </button>
           <button
-            onClick={() => setActiveTab('blogs')}
-            className={`px-4 py-2 rounded font-semibold ${activeTab === 'blogs' ? 'bg-blue-500 text-white' : 'bg-gray-600 text-gray-300'} hover:bg-blue-600 transition`}
+            onClick={() => setActiveTab('tutorials')}
+            className={`px-4 py-2 rounded font-semibold ${activeTab === 'tutorials' ? 'bg-blue-500 text-white' : 'bg-gray-600 text-gray-300'} hover:bg-blue-600 transition`}
           >
-            Manage Blogs
+            Manage Tutorials
           </button>
         </div>
         {activeTab === 'products' ? (
-          <ProductForm products={products} setProducts={setProducts} setBlogs={setBlogs} />
+          <ProductForm products={products} setProducts={setProducts} setTutorials={setTutorials} />
         ) : (
-          <BlogForm blogs={blogs} setBlogs={setBlogs} />
+          <TutorialForm tutorials={tutorials} setTutorials={setTutorials} />
         )}
       </div>
     </div>
