@@ -1,21 +1,43 @@
-
 import React from 'react';
-import ProductCard from '../components/ItemCard';
+import ProductCard from '../components/ProductCard';
 
 function Home({ products }) {
   return (
-    <div className="container mx-auto p-4 text-center">
-      <h1 className="text-4xl font-bold mb-4">Welcome to Selik</h1>
-      <p className="text-lg mb-6">Empowering businesses and gamers alike with exceptional services and innovative solutions. Explore a world of possibilities with us.</p>
-      <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition mb-8">
-        Discover More
-      </button>
-      <h2 className="text-2xl font-semibold mb-4">Our Products</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+    <div className="bg-black">
+      {/* Hero Section */}
+      <section className="container mx-auto px-6 py-16 text-center">
+        <h1 className="text-5xl font-extrabold text-white mb-6 leading-tight">
+          Welcome to Selik
+        </h1>
+        <p className="text-lg text-gray-200 max-w-2xl mx-auto mb-8">
+          Empowering businesses and gamers with cutting-edge services and innovative solutions. 
+          Discover a world of possibilities with us.
+        </p>
+        <a
+          href="#products"
+          className="inline-block bg-blue-600 text-white px-8 py-3 rounded-full font-medium 
+          hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg"
+        >
+          Discover More
+        </a>
+      </section>
+
+      {/* Products Section */}
+      <section id="products" className="container mx-auto px-6 py-12">
+        <h2 className="text-3xl font-bold text-white text-center mb-10">
+          Our Products
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {products.map((product) => (
+            <div
+              key={product.id}
+              className="transform transition duration-300 hover:scale-105"
+            >
+              <ProductCard product={product} />
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

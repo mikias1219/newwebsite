@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useParams } from 'react-router-dom';
 import { fetchTutorials } from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
 
-function Tutorials() {
+function Maintenance() {
+  const { category } = useParams();
   const [tutorials, setTutorials] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);
@@ -12,7 +14,10 @@ function Tutorials() {
   const loadTutorials = async () => {
     try {
       const data = await fetchTutorials();
-      setTutorials(data);
+      const filtered = category
+        ? data.filter((t) => t.category.toLowerCase() === category.toLowerCase())
+        : data;
+      setTutorials(filtered);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching tutorials:', error);
@@ -22,11 +27,13 @@ function Tutorials() {
 
   useEffect(() => {
     loadTutorials();
-  }, []);
+  }, [category]);
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-white">Video Tutorials</h1>
+      <h1 className="text-2xl font-bold mb-4 text-white">
+        PlayStation Maintenance {category ? ` - ${category.charAt(0).toUpperCase() + category.slice(1)}` : ''}
+      </h1>
       {loading ? (
         <p className="text-gray-300">Loading...</p>
       ) : (
@@ -68,4 +75,4 @@ function Tutorials() {
   );
 }
 
-export default Tutorials;
+export default Maintenance;

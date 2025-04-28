@@ -1,24 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import ProductCard from '../components/ProductCard';
-import { fetchProducts } from '../services/api';
+import { fetchProducts, fetchServices } from '../services/api';
+import { AuthContext } from '../context/AuthContext';
+import { CartContext } from '../context/CartContext';
 
 function Inventory() {
   const [products, setProducts] = useState([]);
+  const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useContext(AuthContext);
+  const { addItemToCart } = useContext(CartContext);
 
-  const loadProducts = async () => {
+  const loadData = async () => {
     try {
-      const data = await fetchProducts();
-      setProducts(data);
+      const [productsData, servicesData] = await Promise.all([
+        fetchProducts(),
+        fetchServices(),
+      ]);
+      setProducts(productsData);
+      setServices(servicesData);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error('Error fetching data:', error);
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadProducts();
+    loadData();
   }, []);
 
   return (
@@ -27,15 +36,38 @@ function Inventory() {
       {loading ? (
         <p className="text-gray-300">Loading...</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {products.length === 0 ? (
-            <p className="text-gray-300">No products available.</p>
-          ) : (
-            products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))
-          )}
-        </div>
+        <>
+          <h2 className="text-xl font-semibold mb-2 text-white">Products</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            {products.length === 0 ? (
+              <p className="text-gray-300">No products available.</p>
+            ) : (
+              products.map((product) => (
+                <ProductCard key={product.id} item={product} itemType="product" />
+              ))
+            )}
+          </div>
+          <h2 className="text-xl font-semibold mb-2 text-white">Services</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {services.length === 0 ? (
+              <p className="text-gray-300">No services available.</p>
+            ) : (
+              services.map((service) => (
+                <div key={service.id} className="relative">
+                  <ProductCard item={service} itemType="service" />
+                  {user && !user.is_admin && (
+                    <button
+                      onClick={() => addItemToCart('service', service.id)}
+                      className="absolute bottom-6 right-6 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                    >
+                      Add to Cart
+                    </button>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </>
       )}
     </div>
   );

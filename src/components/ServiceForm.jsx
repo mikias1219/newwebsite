@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
-function ProductForm({ onSubmit, initialData, clearEdit }) {
+function ServiceForm({ onSubmit, initialData, clearEdit }) {
   const [formData, setFormData] = useState({
     name: '',
-    type: '',
+    category: 'Kits',
     price: '',
     description: '',
     image: '',
-    posted_date: new Date().toISOString().split('T')[0],
+    video_url: '',
   });
 
   useEffect(() => {
@@ -25,11 +25,11 @@ function ProductForm({ onSubmit, initialData, clearEdit }) {
     if (!initialData) {
       setFormData({
         name: '',
-        type: '',
+        category: 'Kits',
         price: '',
         description: '',
         image: '',
-        posted_date: new Date().toISOString().split('T')[0],
+        video_url: '',
       });
     }
   };
@@ -47,14 +47,15 @@ function ProductForm({ onSubmit, initialData, clearEdit }) {
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-300">Type</label>
-        <input
-          type="text"
-          value={formData.type}
-          onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+        <label className="block text-sm font-medium text-gray-300">Category</label>
+        <select
+          value={formData.category}
+          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
           className="w-full p-2 mt-1 rounded bg-gray-600 text-white border border-gray-500"
-          required
-        />
+        >
+          <option value="Kits">Kits</option>
+          <option value="Professional">Professional</option>
+        </select>
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-300">Price</label>
@@ -86,9 +87,18 @@ function ProductForm({ onSubmit, initialData, clearEdit }) {
           className="w-full p-2 mt-1 rounded bg-gray-600 text-white border border-gray-500"
         />
       </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-300">YouTube Video URL</label>
+        <input
+          type="text"
+          value={formData.video_url}
+          onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
+          className="w-full p-2 mt-1 rounded bg-gray-600 text-white border border-gray-500"
+        />
+      </div>
       <div className="flex space-x-2">
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-          {initialData ? 'Update' : 'Create'} Product
+          {initialData ? 'Update' : 'Create'} Service
         </button>
         {initialData && (
           <button
@@ -104,4 +114,4 @@ function ProductForm({ onSubmit, initialData, clearEdit }) {
   );
 }
 
-export default ProductForm;
+export default ServiceForm;

@@ -6,8 +6,18 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
-export const loginAdmin = async (credentials) => {
-  const response = await api.post('/login', credentials);
+export const registerUser = async (userData) => {
+  const response = await api.post('/register', userData);
+  return response.data;
+};
+
+export const loginUser = async (credentials) => {
+  const response = await api.post('/login', new URLSearchParams({
+    username: credentials.username,
+    password: credentials.password,
+  }), {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  });
   return response.data;
 };
 
@@ -61,4 +71,99 @@ export const deleteTutorial = async (id, token) => {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
+};
+
+export const fetchServices = async () => {
+  const response = await api.get('/services/');
+  return response.data;
+};
+
+export const createService = async (service, token) => {
+  const response = await api.post('/services/', service, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const updateService = async (id, service, token) => {
+  const response = await api.put(`/services/${id}`, service, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const deleteService = async (id, token) => {
+  const response = await api.delete(`/services/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const fetchCart = async (token) => {
+  const response = await api.get('/cart/', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const addToCart = async (cartItem, token) => {
+  const response = await api.post('/cart/', cartItem, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const removeFromCart = async (cartItemId, token) => {
+  const response = await api.delete(`/cart/${cartItemId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const createPurchase = async (purchase, token) => {
+  const response = await api.post('/purchases/', purchase, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const fetchPurchases = async (token) => {
+  const response = await api.get('/purchases/', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const fetchRequests = async (token) => {
+  const response = await api.get('/requests/', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const createRequest = async (request, token) => {
+  const response = await api.post('/requests/', request, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const updateRequest = async (id, request, token) => {
+  const response = await api.put(`/requests/${id}`, request, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+
+export const fetchYouTubeVideos = async (query) => {
+  const response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+    params: {
+      part: 'snippet',
+      q: query,
+      type: 'video',
+      key: 'AIzaSyARfj3aWaEYErtEIrnuTVUBNOhgIJALxus',
+    },
+  });
+  return response.data.items;
 };

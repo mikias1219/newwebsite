@@ -1,39 +1,63 @@
-
-import React from 'react';
-import ServiceCard from '../components/ServiceCard';
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams } from 'react-router-dom';
+import ProductCard from '../components/ProductCard';
+import { fetchServices } from '../services/api';
+import { AuthContext } from '../context/AuthContext';
+import { CartContext } from '../context/CartContext';
 
 function Services() {
-  const services = [
-    {
-      title: 'Selik Store',
-      description: 'Dive into our vast collection of PlayStation games tailored for every gamer. Discover the latest releases and exclusive titles.',
-      image: '/products/ps5.jpg',
-    },
-    {
-      title: 'Selik Digital',
-      description: 'Empower your business with custom software solutions from our expert development team, crafted to meet your needs.',
-      image: '/products/ps5-slim.jpg',
-    },
-    {
-      title: 'Selik Maintenance',
-      description: 'Experience dependable support with our skilled maintenance team, ready to handle technical and physical challenges.',
-      image: '/products/ps4.jpg',
-    },
-    {
-      title: 'Selik Security',
-      description: 'Stay secure with our advanced security camera systems, designed for homes and businesses to ensure your safety.',
-      image: '/products/ps5.jpg',
-    },
-  ];
+  const { category } = useParams();
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useContext(AuthContext);
+  const { addItemToCart } = useContext(CartContext);
+
+  const loadServices = async () => {
+    try {
+      const data = await fetchServices();
+      const filtered = category
+        ? data.filter((s) => s.category.toLowerCase() === category.toLowerCase())
+        : data;
+      setServices(filtered);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadServices();
+  }, [category]);
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-3xl font-bold mb-6 text-center">Our Services</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {services.map((service) => (
-          <ServiceCard key={service.title} service={service} />
-        ))}
-      </div>
+      <h1 className="text-2xl font-bold mb-4 text-white">
+        Maintenance Services {category ? ` - ${category.charAt(0).toUpperCase() + category.slice(1)}` : ''}
+      </h1>
+      {loading ? (
+        <p className="text-gray-300">Loading...</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {services.length === 0 ? (
+            <p className="text-gray-300">No services available.</p>
+          ) : (
+            services.map((service) => (
+              <div key={service.id} className="relative">
+                <ProductCard item={service} itemType="service" />
+                {user && !user.is_admin && (
+                  <button
+                    onClick={() => addItemToCart('service', service.id)}
+                    className="absolute bottom-6 right-6 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                  >
+                    Add to Cart
+                  </button>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }

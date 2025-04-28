@@ -1,14 +1,18 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Inventory from './pages/Inventory';
-import About from './pages/About';
-import Services from './pages/Services';
-import Contact from './pages/Contact';
+import Maintenance from './pages/Maintenance';
 import Tutorials from './pages/Tutorials';
+import Services from './pages/Services';
+import Cart from './pages/Cart';
 import Admin from './pages/Admin';
-import { fetchProducts, fetchTutorials } from './services/api';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
 
 class ErrorBoundary extends React.Component {
   state = { hasError: false };
@@ -26,73 +30,27 @@ class ErrorBoundary extends React.Component {
 }
 
 function App() {
-  const homeRef = useRef(null);
-  const aboutRef = useRef(null);
-  const servicesRef = useRef(null);
-  const contactRef = useRef(null);
-  const tutorialsRef = useRef(null);
-  const [products, setProducts] = useState([]);
-  const [tutorials, setTutorials] = useState([]);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const productsData = await fetchProducts();
-        const tutorialsData = await fetchTutorials();
-        setProducts(productsData);
-        setTutorials(tutorialsData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-    loadData();
-  }, []);
-
-  const scrollToSection = (ref) => {
-    ref.current.scrollIntoView({ behavior: 'smooth' });
-  };
-
   return (
     <BrowserRouter>
-      <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-        <Navbar
-          scrollToSection={scrollToSection}
-          refs={{ homeRef, aboutRef, servicesRef, contactRef, tutorialsRef }}
-        />
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <main className="flex-grow">
-                <section ref={homeRef} id="home" className="min-h-screen flex items-center bg-cover bg-center" style={{ backgroundImage: 'url(/hero-bg.jpg)' }}>
-                  <Inventory products={products} setProducts={setProducts} />
-                </section>
-                <section ref={aboutRef} id="about" className="min-h-screen flex items-center bg-gray-800">
-                  <About />
-                </section>
-                <section ref={servicesRef} id="services" className="min-h-screen flex items-center bg-gray-900">
-                  <Services />
-                </section>
-                <section ref={contactRef} id="contact" className="min-h-screen flex items-center bg-gray-800">
-                  <Contact />
-                </section>
-                <section ref={tutorialsRef} id="tutorials" className="min-h-screen flex items-center bg-gray-900">
-                  <Tutorials tutorials={tutorials} />
-                </section>
-              </main>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ErrorBoundary>
-                <Admin products={products} setProducts={setProducts} tutorials={tutorials} setTutorials={setTutorials} />
-              </ErrorBoundary>
-            }
-          />
-        </Routes>
-        <Footer />
-      </div>
+      <AuthProvider>
+        <CartProvider>
+          <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<Inventory />} />
+              <Route path="/maintenance/:category?" element={<Maintenance />} />
+              <Route path="/tutorials" element={<Tutorials />} />
+              <Route path="/services/:category?" element={<Services />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/admin" element={<ErrorBoundary><Admin /></ErrorBoundary>} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+            </Routes>
+            <Footer />
+          </div>
+        </CartProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

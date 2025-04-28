@@ -1,11 +1,15 @@
-
 import React from 'react';
 
 function Footer() {
   return (
-    <footer className="bg-gray-900 p-4 text-center border-t border-gray-700">
-      <p>Connect with us on social media: <a href="#" className="text-blue-400 hover:underline">Selik Digitals</a></p>
-      <p className="mt-2">© 2025 Selik Digitals. All rights reserved.</p>
+    <footer className="bg-gray-800 p-4 mt-auto">
+      <div className="container mx-auto text-center text-gray-300">
+        <p>&copy; 2025 Selik Labs. All rights reserved.</p>
+        <p>
+          <a href="/about" className="hover:text-blue-400">About</a> | 
+          <a href="/contact" className="hover:text-blue-400 ml-2">Contact</a>
+        </p>
+      </div>
     </footer>
   );
 }
