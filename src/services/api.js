@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -17,6 +17,22 @@ export const loginUser = async (credentials) => {
     password: credentials.password,
   }), {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  });
+  return response.data;
+};
+
+export const uploadVideo = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post('/upload-video/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data;
+};
+
+export const getVideo = async (filename) => {
+  const response = await api.get(`/media/${filename}`, {
+    responseType: 'blob',
   });
   return response.data;
 };
@@ -154,7 +170,6 @@ export const updateRequest = async (id, request, token) => {
   });
   return response.data;
 };
-
 
 export const fetchYouTubeVideos = async (query) => {
   const response = await axios.get('https://www.googleapis.com/youtube/v3/search', {

@@ -6,20 +6,23 @@ function ProductCard({ item, itemType }) {
 
   return (
     <>
-      <div className="bg-gray-700 p-4 rounded-lg shadow hover:shadow-lg transition">
+      <div className="bg-gray-800 p-4 rounded-lg shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">
         <img
           src={item.image || '/products/placeholder.jpg'}
-          alt={item.name}
+          alt={item.title || item.name}
           className="w-full h-40 object-cover rounded mb-4"
         />
-        <h3 className="text-xl font-semibold mb-2">
-          {item.name} {itemType === 'product' ? `(${item.type})` : `(${item.category})`}
+        <h3 className="text-lg font-semibold mb-2 text-white">
+          {item.title || item.name}{' '}
+          {itemType === 'product' ? `(${item.type})` : `(${item.category})`}
         </h3>
-        <p className="text-gray-300 mb-2">${item.price.toFixed(2)}</p>
-        <p className="text-sm text-gray-500 mb-2">Posted: {item.posted_date}</p>
+        <p className="text-gray-300 mb-2">${item.price?.toFixed(2) || 'N/A'}</p>
+        <p className="text-sm text-gray-500 mb-4">
+          Posted: {item.posted_date ? new Date(item.posted_date).toLocaleDateString() : 'N/A'}
+        </p>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+          className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
         >
           Read More
         </button>
