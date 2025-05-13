@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import {
-  fetchCart, addToCart, removeFromCart, fetchTutorials, fetchServices, createPurchase, fetchRequests
+  fetchCart, addToCart, removeFromCart, fetchTutorials, fetchServices, createPurchase, fetchRequests, updateCartItem
 } from '../services/api';
 
 export const CartContext = createContext();
@@ -11,15 +11,13 @@ export const CartProvider = ({ children }) => {
   const [services, setServices] = useState([]);
   const [pendingRequests, setPendingRequests] = useState(0);
   const [notification, setNotification] = useState(null);
-  const [showCartCard, setShowCartCard] = useState(null); // Item to show in CartCard modal
+  const [showCartCard, setShowCartCard] = useState(null);
 
-  // Show notification with timeout
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
 
-  // Load cart items
   const loadCart = async () => {
     try {
       const token = localStorage.getItem('authToken');
@@ -29,11 +27,10 @@ export const CartProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Error fetching cart:', error);
-      showNotification('Failed to load cart.', 'error');
+      showNotification('Failed to load cart. Please check your connection or login again.', 'error');
     }
   };
 
-  // Load tutorials and services
   const loadItems = async () => {
     try {
       const [tutorialsData, servicesData] = await Promise.all([
@@ -48,7 +45,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Load pending request count
   const loadPendingRequests = async () => {
     try {
       const token = localStorage.getItem('authToken');
@@ -68,7 +64,6 @@ export const CartProvider = ({ children }) => {
     loadPendingRequests();
   }, []);
 
-  // Add item to cart with CartCard modal
   const addItemToCart = async (itemType, itemId, itemDetails) => {
     try {
       const token = localStorage.getItem('authToken');
@@ -76,40 +71,80 @@ export const CartProvider = ({ children }) => {
         showNotification('Please log in to add items to cart.', 'error');
         return;
       }
-      setShowCartCard({ itemType, itemId, ...itemDetails }); // Show CartCard
+      setShowCartCard({ itemType, itemId, ...itemDetails });
     } catch (error) {
       console.error('Error preparing to add to cart:', error);
       showNotification('Error adding to cart.', 'error');
     }
   };
 
-  // Confirm adding item to cart
-  const confirmAddToCart = async () => {
+  const confirmAddToCart = async (item) => {
     if (!showCartCard) return;
     try {
       const token = localStorage.getItem('authToken');
-      const cartItem = {
-        item_type: showCartCard.itemType,
-        item_id: showCartCard.itemId,
-        quantity: 1,
-      };
-      const addedItem = await addToCart(cartItem, token);
-      setCartItems([...cartItems, addedItem]);
-      setShowCartCard(null); // Close CartCard
-      showNotification('Item added to cart!');
+      if (!token) {
+        showNotification('Please log in to add items to cart.', 'error');
+        return;
+      }
+      const existingItem = cartItems.find(
+        (i) => i.item_type === showCartCard.itemType && i.item_id === showCartCard.itemId
+      );
+      if (existingItem) {
+        const newQuantity = existingItem.quantity + item.quantity;
+        await updateCartItem(existingItem.id, { quantity: newQuantity }, token);
+        setCartItems(
+          cartItems.map((i) =>
+            i.id === existingItem.id ? { ...i, quantity: newQuantity } : i
+          )
+        );
+      } else {
+        const cartItem = {
+          item_type: showCartCard.itemType,
+          item_id: showCartCard.itemId,
+          quantity: item.quantity,
+        };
+        const addedItem = await addToCart(cartItem, token);
+        setCartItems([...cartItems, addedItem]);
+      }
+      setShowCartCard(null);
+      showNotification(`Added ${item.quantity} item${item.quantity > 1 ? 's' : ''} to cart!`);
     } catch (error) {
       console.error('Error adding to cart:', error);
-      showNotification('Error adding to cart.', 'error');
+      showNotification(
+        error.response?.data?.detail || 'Error adding to cart. Please check your connection or login again.',
+        'error'
+      );
     }
   };
 
-  // Cancel adding item to cart
   const cancelAddToCart = () => {
     setShowCartCard(null);
     showNotification('Item not added to cart.', 'info');
   };
 
-  // Remove item from cart
+  const updateItemQuantity = async (cartItemId, quantity) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        showNotification('Please log in to update cart.', 'error');
+        return;
+      }
+      await updateCartItem(cartItemId, { quantity }, token);
+      setCartItems(
+        cartItems.map((item) =>
+          item.id === cartItemId ? { ...item, quantity } : item
+        )
+      );
+      showNotification('Quantity updated!');
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      showNotification(
+        error.response?.data?.detail || 'Error updating quantity. Please check your connection or login again.',
+        'error'
+      );
+    }
+  };
+
   const removeItemFromCart = async (cartItemId) => {
     try {
       const token = localStorage.getItem('authToken');
@@ -118,11 +153,13 @@ export const CartProvider = ({ children }) => {
       showNotification('Item removed from cart!');
     } catch (error) {
       console.error('Error removing from cart:', error);
-      showNotification('Error removing from cart.', 'error');
+      showNotification(
+        error.response?.data?.detail || 'Error removing from cart.',
+        'error'
+      );
     }
   };
 
-  // Checkout
   const checkout = async () => {
     try {
       const token = localStorage.getItem('authToken');
@@ -145,7 +182,10 @@ export const CartProvider = ({ children }) => {
       showNotification('Checkout successful!');
     } catch (error) {
       console.error('Error during checkout:', error);
-      showNotification('Checkout failed.', 'error');
+      showNotification(
+        error.response?.data?.detail || 'Checkout failed.',
+        'error'
+      );
     }
   };
 
@@ -157,6 +197,7 @@ export const CartProvider = ({ children }) => {
         confirmAddToCart,
         cancelAddToCart,
         removeItemFromCart,
+        updateItemQuantity,
         checkout,
         tutorials,
         services,

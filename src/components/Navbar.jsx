@@ -1,9 +1,11 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { CartContext } from '../context/CartContext';
 
 function Navbar() {
   const { user, logout } = useContext(AuthContext);
+  const { cartItems } = useContext(CartContext);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -11,11 +13,13 @@ function Navbar() {
     navigate('/');
   };
 
+  const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+
   return (
     <nav className="bg-gray-800 p-4 sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="text-white text-2xl font-bold">Selik Labs</Link>
-        <ul className="flex space-x-4">
+        <ul className="flex space-x-4 items-center">
           <li>
             <Link to="/" className="text-white hover:text-blue-400">Home</Link>
           </li>
@@ -57,8 +61,22 @@ function Navbar() {
               </li>
             </ul>
           </li>
-          <li>
-            <Link to="/cart" className="text-white hover:text-blue-400">Cart</Link>
+          <li className="relative">
+            <Link to="/cart" className="text-white hover:text-blue-400 flex items-center">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+              {cartItemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">
+                  {cartItemCount}
+                </span>
+              )}
+            </Link>
           </li>
           {user ? (
             <>

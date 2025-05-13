@@ -128,7 +128,12 @@ export const addToCart = async (cartItem, token) => {
   });
   return response.data;
 };
-
+export const updateCartItem = async (cartItemId, data, token) => {
+  const response = await axios.patch(`${API_URL}/cart/${cartItemId}/`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
 export const removeFromCart = async (cartItemId, token) => {
   const response = await api.delete(`/cart/${cartItemId}`, {
     headers: { Authorization: `Bearer ${token}` },

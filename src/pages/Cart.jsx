@@ -13,6 +13,7 @@ function Cart() {
     showCartCard,
     confirmAddToCart,
     cancelAddToCart,
+    updateItemQuantity,
   } = useContext(CartContext);
 
   const getItemDetails = (itemType, itemId) => {
@@ -31,6 +32,14 @@ function Cart() {
         return total + (details ? details.price * item.quantity : 0);
       }, 0)
       .toFixed(2);
+  };
+
+  const handleQuantityChange = (cartItemId, delta) => {
+    const item = cartItems.find((i) => i.id === cartItemId);
+    if (item) {
+      const newQuantity = Math.max(1, item.quantity + delta);
+      updateItemQuantity(cartItemId, newQuantity);
+    }
   };
 
   return (
@@ -84,7 +93,23 @@ function Cart() {
                     <p className="text-gray-400">
                       Price: ${details.price?.toFixed(2) || 'N/A'}
                     </p>
-                    <p className="text-gray-400">Quantity: {item.quantity}</p>
+                    <div className="flex items-center space-x-2">
+                      <label className="text-gray-400">Quantity:</label>
+                      <button
+                        onClick={() => handleQuantityChange(item.id, -1)}
+                        className="bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-500"
+                        disabled={item.quantity <= 1}
+                      >
+                        -
+                      </button>
+                      <span className="text-white">{item.quantity}</span>
+                      <button
+                        onClick={() => handleQuantityChange(item.id, 1)}
+                        className="bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-500"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <button

@@ -1,16 +1,42 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 function CartCard({ item, onConfirm, onCancel }) {
+  const [quantity, setQuantity] = useState(1);
+
+  const handleQuantityChange = (delta) => {
+    setQuantity((prev) => Math.max(1, prev + delta));
+  };
+
+  const handleConfirm = () => {
+    onConfirm({ ...item, quantity });
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full shadow-lg">
+      <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full shadow-lg transform transition-all">
         <h3 className="text-xl font-bold mb-4 text-white">Added to Cart</h3>
         <div className="bg-gray-700 p-4 rounded-lg mb-4">
           <p className="text-lg font-semibold text-white">
             {item.title || item.name} ({item.itemType})
           </p>
           <p className="text-gray-300">Price: ${item.price?.toFixed(2) || 'N/A'}</p>
-          <p className="text-gray-300">Quantity: 1</p>
+          <div className="flex items-center space-x-2 mt-2">
+            <label className="text-gray-300">Quantity:</label>
+            <button
+              onClick={() => handleQuantityChange(-1)}
+              className="bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-500"
+              disabled={quantity <= 1}
+            >
+              -
+            </button>
+            <span className="text-white">{quantity}</span>
+            <button
+              onClick={() => handleQuantityChange(1)}
+              className="bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-500"
+            >
+              +
+            </button>
+          </div>
           {item.image && (
             <img
               src={item.image}
@@ -21,14 +47,14 @@ function CartCard({ item, onConfirm, onCancel }) {
         </div>
         <div className="flex justify-end space-x-2">
           <button
-            onClick={onConfirm}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+            onClick={handleConfirm}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition"
           >
             Confirm
           </button>
           <button
             onClick={onCancel}
-            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition"
           >
             Cancel
           </button>
