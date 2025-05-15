@@ -292,7 +292,7 @@ function Admin() {
                       <div>
                         <h3 className="text-lg font-medium">{tutorial.title}</h3>
                         <p className="text-gray-400">
-                          {tutorial.category} - ${tutorial.price?.toFixed(2) || 'N/A'}
+                          {tutorial.tutorial_type} - ${tutorial.price?.toFixed(2) || 'N/A'}
                         </p>
                       </div>
                       <div className="space-x-2">
