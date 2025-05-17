@@ -1,67 +1,82 @@
 import React, { useState } from 'react';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import { motion } from 'framer-motion';
+import { useCart } from '../context/CartContext';
 
-function CartCard({ item, onConfirm, onCancel }) {
+const CartCard = ({ item, onClose }) => {
   const [quantity, setQuantity] = useState(1);
+  const { addItemToCart } = useCart();
 
-  const handleQuantityChange = (delta) => {
-    setQuantity((prev) => Math.max(1, prev + delta));
-  };
-
-  const handleConfirm = () => {
-    onConfirm({ ...item, quantity });
+  const handleSubmit = () => {
+    addItemToCart({
+      ...item,
+      quantity
+    });
+    onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full shadow-lg transform transition-all">
-        <h3 className="text-xl font-bold mb-4 text-white">Added to Cart</h3>
-        <div className="bg-gray-700 p-4 rounded-lg mb-4">
-          <p className="text-lg font-semibold text-white">
-            {item.title || item.name} ({item.itemType})
-          </p>
-          <p className="text-gray-300">Price: ${item.price?.toFixed(2) || 'N/A'}</p>
-          <div className="flex items-center space-x-2 mt-2">
-            <label className="text-gray-300">Quantity:</label>
-            <button
-              onClick={() => handleQuantityChange(-1)}
-              className="bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-500"
-              disabled={quantity <= 1}
-            >
-              -
-            </button>
-            <span className="text-white">{quantity}</span>
-            <button
-              onClick={() => handleQuantityChange(1)}
-              className="bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-500"
-            >
-              +
-            </button>
-          </div>
-          {item.image && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+    >
+      <motion.div
+        initial={{ scale: 0.95 }}
+        animate={{ scale: 1 }}
+        className="bg-gray-800 rounded-xl p-6 max-w-md w-full relative"
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-1 text-gray-400 hover:text-white transition"
+        >
+          <XMarkIcon className="w-6 h-6" />
+        </button>
+
+        <div className="space-y-4">
+          <h3 className="text-xl font-bold text-white">Add to Cart</h3>
+          
+          <div className="flex items-center gap-4">
             <img
               src={item.image}
-              alt={item.title || item.name}
-              className="w-32 h-32 object-cover mt-2 rounded"
+              alt={item.name}
+              className="w-20 h-20 object-cover rounded-lg"
             />
-          )}
-        </div>
-        <div className="flex justify-end space-x-2">
+            <div>
+              <h4 className="text-lg font-semibold text-white">{item.name}</h4>
+              <p className="text-blue-400">${item.price?.toFixed(2)}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between bg-gray-700 p-3 rounded-lg">
+            <span className="text-gray-300">Quantity</span>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                className="w-8 h-8 rounded-lg bg-gray-600 hover:bg-gray-500"
+              >
+                -
+              </button>
+              <span className="text-white w-8 text-center">{quantity}</span>
+              <button
+                onClick={() => setQuantity(q => q + 1)}
+                className="w-8 h-8 rounded-lg bg-gray-600 hover:bg-gray-500"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
           <button
-            onClick={handleConfirm}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition"
+            onClick={handleSubmit}
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 rounded-lg hover:opacity-90 transition"
           >
-            Confirm
-          </button>
-          <button
-            onClick={onCancel}
-            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition"
-          >
-            Cancel
+            Add {quantity} to Cart - ${(item.price * quantity).toFixed(2)}
           </button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
-}
+};
 
 export default CartCard;

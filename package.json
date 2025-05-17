@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.12.1",
     "gym-finder": "file:",
     "lucide-react": "^0.468.0",
     "ras-fron-end": "file:",

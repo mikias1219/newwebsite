@@ -1,104 +1,99 @@
 import React, { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { CartContext } from '../context/CartContext';
-import CartCard from './CartCard';
+import { useCart } from '../context/CartContext';
+import { motion } from 'framer-motion';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 function ProductModal({ item, itemType, onClose }) {
   const { user } = useContext(AuthContext);
-  const { addItemToCart, showCartCard, confirmAddToCart, cancelAddToCart } = useContext(CartContext);
+  const { showModal } = useCart();
+
+  const getYouTubeEmbedUrl = (url) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url?.match(regExp);
+    return match && match[2].length === 11 
+      ? `https://www.youtube.com/embed/${match[2]}?autoplay=1&rel=0` 
+      : null;
+  };
 
   const handleAddToCart = () => {
-    if (!user) {
-      // Notification handled by CartContext
-      addItemToCart(itemType, item.id, {
-        name: item.name,
-        title: item.title,
-        price: item.price,
-        image: item.image,
-      });
-      return;
-    }
-    addItemToCart(itemType, item.id, {
-      name: item.name,
-      title: item.title,
+    showModal({
+      id: item.id,
+      name: item.title || item.name,
       price: item.price,
       image: item.image,
+      type: itemType
     });
   };
 
-  // Convert YouTube URL to embed URL
-  const getYouTubeEmbedUrl = (url) => {
-    if (!url) return null;
-    const videoId =
-      url.split('v=')[1]?.split('&')[0] ||
-      url.split('youtu.be/')[1]?.split('?')[0] ||
-      url.split('youtube.com/shorts/')[1]?.split('?')[0];
-    return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
-  };
-
   return (
-    <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-        <div className="bg-gray-800 p-6 rounded-lg max-w-lg w-full shadow-lg">
-          <h2 className="text-2xl font-bold mb-4 text-white">{item.title || item.name}</h2>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative"
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white transition-colors"
+        >
+          <XMarkIcon className="w-6 h-6" />
+        </button>
+
+        <div className="p-6 space-y-6">
           {item.image && (
             <img
               src={item.image}
               alt={item.title || item.name}
-              className="w-full h-48 object-cover mb-4 rounded"
+              className="w-full h-64 object-cover rounded-xl"
             />
           )}
-          <p className="text-gray-300 mb-4">{item.content || item.description || 'No description available.'}</p>
-          <p className="text-gray-300 mb-4">Price: ${item.price?.toFixed(2) || 'N/A'}</p>
-          {item.video_url ? (
-            <div className="mb-4">
+
+          {item.video_url && (
+            <div className="aspect-video rounded-xl overflow-hidden">
               <iframe
                 width="100%"
-                height="315"
+                height="100%"
                 src={getYouTubeEmbedUrl(item.video_url)}
-                title="YouTube video"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-              ></iframe>
+                className="w-full h-full"
+              />
             </div>
-          ) : item.video_file ? (
-            <div className="mb-4">
-              <video width="100%" height="315" controls>
-                <source
-                  src={`http://localhost:8000/media/${item.video_file.split('/').pop()}`}
-                  type="video/mp4"
-                />
-                Your browser does not support the video tag.
-              </video>
+          )}
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-3xl font-bold text-white">
+                {item.title || item.name}
+              </h2>
+              <span className="text-2xl font-bold text-blue-400">
+                ${item.price?.toFixed(2)}
+              </span>
             </div>
-          ) : null}
-          <div className="flex justify-end space-x-2">
+
+            <p className="text-gray-300 leading-relaxed">
+              {item.description || 'No description available.'}
+            </p>
+
             {user && !user.is_admin && (
               <button
                 onClick={handleAddToCart}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 rounded-lg hover:opacity-90 transition-opacity font-semibold"
               >
                 Add to Cart
               </button>
             )}
-            <button
-              onClick={onClose}
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition"
-            >
-              Close
-            </button>
           </div>
         </div>
-      </div>
-      {showCartCard && (
-        <CartCard
-          item={showCartCard}
-          onConfirm={confirmAddToCart}
-          onCancel={cancelAddToCart}
-        />
-      )}
-    </>
+      </motion.div>
+    </motion.div>
   );
 }
 

@@ -1,12 +1,14 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser, registerUser } from '../services/api';
+import { useToast } from '../App'; 
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const { addToast } = useToast();
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -24,9 +26,19 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('authToken', token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
+      addToast({
+        type: 'success',
+        message: 'Login successful!',
+        description: 'You have been successfully logged in.'
+      });
       navigate(userData.is_admin ? '/admin' : '/dashboard');
     } catch (error) {
-      throw new Error('Login failed');
+      addToast({
+        type: 'error',
+        message: 'Login failed',
+        description: 'Invalid username or password'
+      });
+      throw error;
     }
   };
 
@@ -34,8 +46,18 @@ export const AuthProvider = ({ children }) => {
     try {
       await registerUser(userData);
       await login({ username: userData.username, password: userData.password });
+      addToast({
+        type: 'success',
+        message: 'Registration successful!',
+        description: 'Your account has been created.'
+      });
     } catch (error) {
-      throw new Error('Registration failed');
+      addToast({
+        type: 'error',
+        message: 'Registration failed',
+        description: error.response?.data?.detail || 'Please check your information'
+      });
+      throw error;
     }
   };
 
@@ -43,6 +65,10 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
     setUser(null);
+    addToast({
+      type: 'success',
+      message: 'Logged out successfully!'
+    });
     navigate('/');
   };
 
@@ -52,3 +78,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
+export const useAuth = () => useContext(AuthContext);

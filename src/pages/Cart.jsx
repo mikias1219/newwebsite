@@ -1,148 +1,82 @@
-import React, { useContext } from 'react';
-import { CartContext } from '../context/CartContext';
-import CartCard from '../components/CartCard';
+import React, { useState } from 'react';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import { motion } from 'framer-motion';
+import { useCart } from '../context/CartContext';
 
-function Cart() {
-  const {
-    cartItems,
-    removeItemFromCart,
-    checkout,
-    tutorials,
-    services,
-    pendingRequests,
-    showCartCard,
-    confirmAddToCart,
-    cancelAddToCart,
-    updateItemQuantity,
-  } = useContext(CartContext);
+const CartCard = ({ item, onClose }) => {
+  const [quantity, setQuantity] = useState(1);
+  const { addItemToCart } = useCart();
 
-  const getItemDetails = (itemType, itemId) => {
-    if (itemType === 'tutorial') {
-      return tutorials.find((t) => t.id === itemId);
-    } else if (itemType === 'service') {
-      return services.find((s) => s.id === itemId);
-    }
-    return null;
-  };
-
-  const calculateTotal = () => {
-    return cartItems
-      .reduce((total, item) => {
-        const details = getItemDetails(item.item_type, item.item_id);
-        return total + (details ? details.price * item.quantity : 0);
-      }, 0)
-      .toFixed(2);
-  };
-
-  const handleQuantityChange = (cartItemId, delta) => {
-    const item = cartItems.find((i) => i.id === cartItemId);
-    if (item) {
-      const newQuantity = Math.max(1, item.quantity + delta);
-      updateItemQuantity(cartItemId, newQuantity);
-    }
+  const handleSubmit = () => {
+    addItemToCart({
+      ...item,
+      quantity
+    });
+    onClose();
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
-      {/* Request Notification Panel */}
-      {pendingRequests > 0 && (
-        <div className="fixed top-4 left-4 bg-blue-500 text-white p-4 rounded-lg shadow-lg flex items-center space-x-2">
-          <span>{pendingRequests} Pending Request{pendingRequests > 1 ? 's' : ''}</span>
-          <span className="bg-white text-blue-500 rounded-full px-2 py-1 text-sm">
-            {pendingRequests}
-          </span>
-        </div>
-      )}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+    >
+      <motion.div
+        initial={{ scale: 0.95 }}
+        animate={{ scale: 1 }}
+        className="bg-gray-800 rounded-xl p-6 max-w-md w-full relative"
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-1 text-gray-400 hover:text-white transition"
+        >
+          <XMarkIcon className="w-6 h-6" />
+        </button>
 
-      {/* Cart Header */}
-      <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
-
-      {/* Cart Items */}
-      {cartItems.length === 0 ? (
-        <div className="bg-gray-800 p-6 rounded-lg text-center">
-          <p className="text-gray-400 text-lg">Your cart is empty.</p>
-          <a
-            href="/"
-            className="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            Continue Shopping
-          </a>
-        </div>
-      ) : (
         <div className="space-y-4">
-          {cartItems.map((item) => {
-            const details = getItemDetails(item.item_type, item.item_id);
-            if (!details) return null;
-            return (
-              <div
-                key={item.id}
-                className="bg-gray-800 p-4 rounded-lg flex items-center justify-between hover:bg-gray-700 transition"
-              >
-                <div className="flex items-center space-x-4">
-                  {details.image && (
-                    <img
-                      src={details.image}
-                      alt={details.name || details.title}
-                      className="w-16 h-16 object-cover rounded"
-                    />
-                  )}
-                  <div>
-                    <h2 className="text-lg font-semibold">
-                      {details.name || details.title} ({item.item_type})
-                    </h2>
-                    <p className="text-gray-400">
-                      Price: ${details.price?.toFixed(2) || 'N/A'}
-                    </p>
-                    <div className="flex items-center space-x-2">
-                      <label className="text-gray-400">Quantity:</label>
-                      <button
-                        onClick={() => handleQuantityChange(item.id, -1)}
-                        className="bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-500"
-                        disabled={item.quantity <= 1}
-                      >
-                        -
-                      </button>
-                      <span className="text-white">{item.quantity}</span>
-                      <button
-                        onClick={() => handleQuantityChange(item.id, 1)}
-                        className="bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-500"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => removeItemFromCart(item.id)}
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-                >
-                  Remove
-                </button>
-              </div>
-            );
-          })}
-          <div className="bg-gray-800 p-4 rounded-lg flex justify-between items-center">
-            <p className="text-xl font-semibold">Total: ${calculateTotal()}</p>
-            <button
-              onClick={checkout}
-              className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded"
-            >
-              Checkout
-            </button>
+          <h3 className="text-xl font-bold text-white">Add to Cart</h3>
+          
+          <div className="flex items-center gap-4">
+            <img
+              src={item.image}
+              alt={item.name}
+              className="w-20 h-20 object-cover rounded-lg"
+            />
+            <div>
+              <h4 className="text-lg font-semibold text-white">{item.name}</h4>
+              <p className="text-blue-400">${item.price?.toFixed(2)}</p>
+            </div>
           </div>
+
+          <div className="flex items-center justify-between bg-gray-700 p-3 rounded-lg">
+            <span className="text-gray-300">Quantity</span>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                className="w-8 h-8 rounded-lg bg-gray-600 hover:bg-gray-500"
+              >
+                -
+              </button>
+              <span className="text-white w-8 text-center">{quantity}</span>
+              <button
+                onClick={() => setQuantity(q => q + 1)}
+                className="w-8 h-8 rounded-lg bg-gray-600 hover:bg-gray-500"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <button
+            onClick={handleSubmit}
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 rounded-lg hover:opacity-90 transition"
+          >
+            Add {quantity} to Cart - ${(item.price * quantity).toFixed(2)}
+          </button>
         </div>
-      )}
-
-      {/* CartCard Modal */}
-      {showCartCard && (
-        <CartCard
-          item={showCartCard}
-          onConfirm={confirmAddToCart}
-          onCancel={cancelAddToCart}
-        />
-      )}
-    </div>
+      </motion.div>
+    </motion.div>
   );
-}
+};
 
-export default Cart;
+export default CartCard;
